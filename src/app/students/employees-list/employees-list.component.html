@@ -1,0 +1,114 @@
+<form>
+
+<div class="table-loading-shade" *ngIf="isProcessing">
+  <div *ngIf="isProcessing" class="spinner-border text-primary" style="width: 80px; height: 80px;">
+	<span class="sr-only">Loading...</span>
+  </div>
+</div>
+
+  <div class="table-container">
+	<table class="table table-sticky">
+	  <thead>
+	  <tr>
+	    <th scope="col"><div class="form-check"><input class="form-check-input position-static" type="checkbox" value="" (click)="$event ? masterToggle() : null" [checked]="hasSelected() && isAllSelected()" [indeterminate]="hasSelected() && !isAllSelected()"></div></th>
+	    <th scope="col" #tdEmployeeId><span sortable="employee" (sort)="onSort($event)">Id</span><i class="material-icons column-filtered" placement="bottom" container="body" ngbTooltip="Filter by Employee Id" (click)="openTextFilterDialog(tdEmployeeId, 'employee', 'Employee Id')" [ngClass]="getColumnFilterClass('name')">filter_list</i></th>
+      <th scope="col" #tdFirstName><span sortable="name" (sort)="onSort($event)">Name</span><i class="material-icons column-not-filtered" placement="bottom" container="body" ngbTooltip="Filter by Name" (click)="openTextFilterDialog(tdFirstName, 'name', 'Name')" [ngClass]="getColumnFilterClass('firstName')">filter_list</i></th>
+      <th scope="col" #tdEmployeeEmail><span sortable="email" (sort)="onSort($event)">Email</span><i class="material-icons" placement="bottom" container="body" ngbTooltip="Filter by Email" (click)="openTextFilterDialog(tdEmployeeEmail, 'email', 'Email')" [ngClass]="getColumnFilterClass('studentEmail')">filter_list</i></th>
+      <th scope="col" #tdLastName><span sortable="phone" (sort)="onSort($event)">Phone</span><i class="material-icons" placement="bottom" container="body" ngbTooltip="Filter by Phone" (click)="openTextFilterDialog(tdLastName, 'phone', 'Phone')" [ngClass]="getColumnFilterClass('lastName')">filter_list</i></th>
+
+      <th scope="col">
+		  <i class="material-icons" placement="bottom" container="body" ngbTooltip="Add employee" (click)="onAddStudentClick()">add_box</i>
+		  <i class="material-icons" placement="bottom" container="body" ngbTooltip="Delete selected" (click)="onDeleteSelectedClick()">delete_sweep</i>
+		</th>
+	  </tr>
+	  </thead>
+	  <tbody>
+	    <tr *ngIf="isAdding">
+		  <td [attr.colspan]="1"></td>
+		  <td>
+			<input type="text" class="form-control" [formControl]="employeeIdFormControl" style="width: 140px;" />
+			<div *ngIf="employeeIdFormControl.invalid && (employeeIdFormControl.dirty || employeeIdFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeIdFormControl)}}</small></div>
+		  </td>
+		  <td>
+			<input type="text" class="form-control" [formControl]="employeeNameFormControl"  />
+			<div *ngIf="employeeNameFormControl.invalid && (employeeNameFormControl.dirty || employeeNameFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeNameFormControl)}}</small></div>
+		  </td>
+		  <td>
+			<input type="text" class="form-control" [formControl]="employeeEmailFormControl"  />
+			<div *ngIf="employeeEmailFormControl.invalid && (employeeEmailFormControl.dirty || employeeEmailFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeEmailFormControl)}}</small></div>
+		  </td>
+      <td>
+        <input type="text" class="form-control" [formControl]="employeePhoneFormControl"  />
+        <div *ngIf="employeePhoneFormControl.invalid && (employeePhoneFormControl.dirty || employeePhoneFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeePhoneFormControl)}}</small></div>
+      </td>
+		  <td>
+			<i *ngIf="isAddDisabled()" class="material-icons" placement="bottom" container="body" ngbTooltip="Save" style="color:gray">done</i>
+			<i *ngIf="!isAddDisabled()" class="material-icons" placement="bottom" container="body" ngbTooltip="Save" (click)="onAddClick()">done</i>
+			<i class="material-icons" placement="bottom" container="body" ngbTooltip="Cancel" (click)="onCancelAddClick()">close</i>
+		  </td>
+		</tr>
+
+	    <ng-container *ngFor="let student of students">
+		<!-- The master row for each student. -->
+		<tr class="masterRow">
+		  <td id="selectionColumn"><div class="form-check"><input class="form-check-input position-static" type="checkbox" value=""(click)="$event.stopPropagation()" (change)="$event ? studentToggle(student) : null" [checked]="selectedStudents.has(student)"></div></td>
+		  <td scope="row" id="employeeId">
+		    <span *ngIf="!isEditingStudent(student.employeeId)">{{student.employee}}</span>
+			<span *ngIf="isEditingStudent(student.employeeId)">
+				<input type="text" class="form-control" [formControl]="employeeIdFormControl" />
+				<div *ngIf="employeeIdFormControl.invalid && (employeeIdFormControl.dirty || employeeIdFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeIdFormControl)}}</small></div>
+			</span>
+		  </td>
+		  <td scope="row">
+		    <span *ngIf="!isEditingStudent(student.employeeId)">{{student.name}}</span>
+			<span *ngIf="isEditingStudent(student.employeeId)">
+				<input type="text" class="form-control" [formControl]="employeeNameFormControl"  />
+				<div *ngIf="employeeNameFormControl.invalid && (employeeNameFormControl.dirty || employeeNameFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeNameFormControl)}}</small></div>
+			</span>
+		  </td>
+      <td scope="row">
+        <span *ngIf="!isEditingStudent(student.employeeId)">{{student.email}}</span>
+        <span *ngIf="isEditingStudent(student.employeeId)">
+				<input type="text" class="form-control" [formControl]="employeeEmailFormControl"  />
+				<div *ngIf="employeeEmailFormControl.invalid && (employeeEmailFormControl.dirty || employeeEmailFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeeEmailFormControl)}}</small></div>
+			</span>
+      </td>
+		  <td scope="row">
+		    <span *ngIf="!isEditingStudent(student.employeeId)">{{student.phone}}</span>
+			<span *ngIf="isEditingStudent(student.employeeId)">
+				<input type="text" class="form-control" [formControl]="employeePhoneFormControl"  />
+				<div *ngIf="employeePhoneFormControl.invalid && (employeePhoneFormControl.dirty || employeePhoneFormControl.touched)" class="text-danger"><small>{{getErrorMessage(employeePhoneFormControl)}}</small></div>
+			</span>
+		  </td>
+		  <td id="commandColumn" scope="row">
+		  	<span *ngIf="!isEditingStudent(student.employeeId)">
+				<i class="material-icons" placement="bottom" container="body" ngbTooltip="Edit employee" (click)="onEditClick(student.employeeId)">edit</i>
+				<i class="material-icons" placement="bottom" container="body" ngbTooltip="Delete employee" (click)="onDeleteClick(student.employeeId)">delete</i>
+		    </span>
+		  	<span *ngIf="isEditingStudent(student.employeeId)">
+				<i *ngIf="isUpdateDisabled()" class="material-icons" placement="bottom" container="body" ngbTooltip="Save" style="color:gray">done</i>
+				<i *ngIf="!isUpdateDisabled()" class="material-icons" placement="bottom" container="body" ngbTooltip="Save" (click)="onUpdateClick()">done</i>
+				<i class="material-icons" placement="bottom" container="body" ngbTooltip="Cancel" (click)="onCancelEditClick()">close</i>
+		    </span>
+		  </td>
+		</tr>
+
+		</ng-container>
+	  </tbody>
+	</table>
+  </div>
+
+  <div class="d-flex justify-content-between p-2">
+    <ngb-pagination [collectionSize]="totalStudents" [(page)]="page" [pageSize]="pageSize" (pageChange)="onPageChange()">
+    </ngb-pagination>
+
+    <select class="custom-select" style="width: auto" name="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+      <option [ngValue]="5">5 items per page</option>
+      <option [ngValue]="10">10 items per page</option>
+      <option [ngValue]="15">15 items per page</option>
+      <option [ngValue]="20">20 items per page</option>
+      <option [ngValue]="25">25 items per page</option>
+    </select>
+  </div>
+
+</form>
