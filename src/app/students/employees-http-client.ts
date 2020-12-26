@@ -204,10 +204,9 @@ export class EmployeesHttpClient {
         // Get the index of the student that is being deleted
         const studentIndex: number = this.EMPLOYEES.findIndex(s => s.employeeId === studentId);
 
-        if (studentIndex === 0) {
-            // Simulate an error for testing purposes
+        if (studentIndex === -1) {
             rsp.success = false;
-            rsp.error = 'Failed to delete student, please try again!';
+            rsp.error = 'Failed to delete employee, please try again!';
         } else {
             rsp.success = true;
 
